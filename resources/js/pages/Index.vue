@@ -100,8 +100,8 @@ async function resetSession() {
                         <MenubarItem @select="openApp('portfolioOS')">
                             About Portfolio OS
                         </MenubarItem>
-                        <MenubarItem @select="openApp('displayOptions')">
-                            Display Options…
+                        <MenubarItem @select="openApp('settings')">
+                            Settings…
                         </MenubarItem>
                         <MenubarSeparator />
                         <MenubarItem @select="resetSession">
@@ -223,7 +223,7 @@ async function resetSession() {
             </Menubar>
         </header>
 
-        <main id="desktop" class="relative flex-grow w-full bg-background">
+        <main id="desktop" class="desktop relative flex-grow w-full">
             <Desktop />
         </main>
 

@@ -1,6 +1,6 @@
 export { default as DesktopWindow } from './DesktopWindow.vue'
 export { default as DesktopWindowPlaceholder } from './DesktopWindowPlaceholder.vue'
-export { default as DesktopWindowDisplayOptions } from './DesktopWindowDisplayOptions.vue'
+export { default as DesktopWindowSettings } from './DesktopWindowSettings.vue'
 export { default as DesktopWindowHome } from './DesktopWindowHome.vue'
 export { default as DesktopWindowAbout } from './DesktopWindowAbout.vue'
 export { default as DesktopWindowCalculator } from './DesktopWindowCalculator.vue'

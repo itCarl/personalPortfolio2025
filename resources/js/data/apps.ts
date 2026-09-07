@@ -83,10 +83,10 @@ export const appDefinitions = [
         { width: 640, height: 520 }
     ),
     makeApp(
-        'Display Options',
+        'Settings',
         Settings,
-        () => import('@/components/ui/desktop-window/DesktopWindowDisplayOptions.vue'),
-        { width: 420, height: 270 }
+        () => import('@/components/ui/desktop-window/DesktopWindowSettings.vue'),
+        { width: 640, height: 460 }
     ),
     makeApp(
         'Trash',

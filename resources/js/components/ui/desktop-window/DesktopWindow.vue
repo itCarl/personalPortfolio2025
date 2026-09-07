@@ -155,8 +155,9 @@ function startResize(e: MouseEvent, dir: ResizeDir) {
                 isMobile && 'flex flex-col',
             )"
         >
+            <!-- `desktop-window-titlebar` is the hook the cursor sets in app.css use -->
             <header
-                class="flex items-center justify-between px-3 py-2 bg-secondary border-b border-hairline"
+                class="desktop-window-titlebar flex items-center justify-between px-3 py-2 bg-secondary border-b border-hairline"
             >
                 <div class="flex items-center gap-2">
                     <div class="w-2.5 h-2.5 bg-brand rounded-full"></div>
