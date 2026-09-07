@@ -8,7 +8,7 @@ interface GalleryImage {
 // Everything in public/images/projects — older work from the 2022 portfolio plus
 // screenshots of the projects written up in the Projects window.
 const images: GalleryImage[] = [
-    { src: '/images/projects/blueway.png', title: 'BlueWay — waterway map PWA' },
+    { src: '/images/projects/blueway.png', title: 'BlueWay — brand mark' },
     { src: '/images/projects/netwarden.png', title: 'NetWarden — brand mark' },
     { src: '/images/projects/quant-broker.png', title: 'Quant Broker — Cookie Clicker mod' },
     { src: '/images/projects/3dp-manager.png', title: 'Project Manager for Obsidian — parts list & filament budget', href: 'https://github.com/itCarl/obsidian-project-manager' },
@@ -36,7 +36,6 @@ const images: GalleryImage[] = [
     { src: '/images/projects/title_image_lithophane.PNG', title: 'Lithophane stand — CAD render' },
     { src: '/images/projects/blubber_lounge_fridge_magnet.webp', title: 'Blubber Lounge — Fridge magnet', href: 'https://blubber-lounge.de/' },
     { src: '/images/projects/vcc_west_brb_logo.webp', title: 'VCC West Brandenburg — Logo' },
-    // Same model as title_image_can1.png, but the larger render.
     { src: '/images/projects/title_image_can.PNG', title: 'Fridge can organizer — CAD render' },
     { src: '/images/projects/gadze01.webp', title: 'Gadze — photography' },
 ]

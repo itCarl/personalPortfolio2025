@@ -1,4 +1,5 @@
 {
+    "name": "portfolio-os",
     "private": true,
     "type": "module",
     "scripts": {

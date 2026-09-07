@@ -320,6 +320,11 @@
     html[data-cursor="pixel"] .cursor-default {
         cursor: url('/cursors/pixel/default.svg') 2 2, auto;
     }
+    /* `:is()` takes the specificity of its most specific argument ([role="button"] /
+       .press), so this selector and the `html[data-cursor="…"] .cursor-default` rule
+       above both weigh (0,2,1). The tie is broken by source order alone — every
+       `:is(a, button, …)` rule in this block must stay *after* its `.cursor-default`
+       rule, or interactive elements fall back to the default arrow. */
     html[data-cursor="pixel"] :is(a, button, [role="button"], .press, summary) {
         cursor: url('/cursors/pixel/pointer.svg') 6 2, pointer;
     }

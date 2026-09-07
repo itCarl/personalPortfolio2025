@@ -35,7 +35,9 @@ const isResizing = ref(false)
 
 // Desktop: free-floating, cascaded, resizable box. Mobile: the window fills the
 // desktop area, and only the top-most non-minimized one is visible (the rest stay
-// mounted, so their content keeps its state — same trick as `minimized`).
+// mounted, so their content keeps its state — same trick as `minimized`). Crossing
+// the 768 px breakpoint is the exception: Desktop.vue's `layoutKey` is part of every
+// icon and window key, so both remount there and window content state is discarded.
 const windowStyle = computed<CSSProperties>(() => {
     if (isMobile.value) {
         return {
@@ -53,7 +55,6 @@ const windowStyle = computed<CSSProperties>(() => {
         top: fullscreen.value ? '0' : `${top.value}px`,
         width: fullscreen.value ? '100%' : `${width.value}px`,
         height: fullscreen.value ? '100%' : `${height.value}px`,
-        minHeight: '120px',
         zIndex: fullscreen.value ? 9999 : props.z,
         display: props.minimized ? 'none' : undefined,
     }
@@ -143,7 +144,9 @@ function startResize(e: MouseEvent, dir: ResizeDir) {
 </script>
 
 <template>
-    <!-- disabled on mobile: the window then renders in place, inside #desktop -->
+    <!-- Disabled on mobile: the window then renders in place, inside #desktop, so the
+         `absolute inset-0` mobile style resolves against the desktop area as its
+         containing block — no global selector or extra wrapper needed. -->
     <teleport to="body" :disabled="isMobile">
         <div
             v-draggable="isMobile ? false : { bounce: true, mode: 'topleft', handle: 'header' }"
