@@ -79,7 +79,7 @@ function formatNum(n: number): string {
 // buttons stretch to fill their grid cell, so the pad scales with the window
 const numKey = 'press rounded-md bg-card border border-hairline text-lg font-medium hover:bg-accent'
 const fnKey = 'press rounded-md bg-secondary border border-hairline text-lg font-medium hover:bg-accent'
-const opKey = 'press rounded-md bg-brand text-primary-foreground text-lg font-semibold'
+const opKey = 'press rounded-md bg-primary text-primary-foreground text-lg font-semibold'
 </script>
 
 <template>

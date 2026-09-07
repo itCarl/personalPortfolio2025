@@ -28,7 +28,7 @@ function send() {
         ></textarea>
 
         <button
-            class="press rounded-md bg-brand px-4 py-2 font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            class="press rounded-md bg-primary px-4 py-2 font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
             :disabled="!question.trim()"
             @click="send"
         >

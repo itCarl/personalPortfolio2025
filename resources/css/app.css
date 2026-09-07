@@ -267,6 +267,19 @@
         background-size: var(--wallpaper-size, auto);
     }
 
+    /*
+      Drag handles (the `v-draggable` directive). The directive only marks its
+      handle with `data-draggable-handle` / `data-dragging` — it must not set
+      `cursor` inline, because an inline cursor outranks every layer and would
+      kill the title-bar rules of the cursor sets below.
+    */
+    [data-draggable-handle] {
+        cursor: grab;
+    }
+    [data-draggable-handle][data-dragging] {
+        cursor: grabbing;
+    }
+
     /* Only the `aurora` preset animates, and only if motion is welcome. */
     html[data-wallpaper="aurora"] .desktop {
         animation: wallpaper-drift 32s ease-in-out infinite;
@@ -316,6 +329,9 @@
     html[data-cursor="pixel"] .desktop-window-titlebar {
         cursor: url('/cursors/pixel/move.svg') 16 16, move;
     }
+    html[data-cursor="pixel"] .desktop-window-titlebar[data-dragging] {
+        cursor: url('/cursors/pixel/move.svg') 16 16, grabbing;
+    }
     html[data-cursor="pixel"] :is(.cursor-nw-resize, .cursor-se-resize) {
         cursor: url('/cursors/pixel/nwse-resize.svg') 16 16, nwse-resize;
     }
@@ -344,6 +360,9 @@
     html[data-cursor="rounded"] .desktop-window-titlebar {
         cursor: url('/cursors/rounded/move.svg') 16 16, move;
     }
+    html[data-cursor="rounded"] .desktop-window-titlebar[data-dragging] {
+        cursor: url('/cursors/rounded/move.svg') 16 16, grabbing;
+    }
     html[data-cursor="rounded"] :is(.cursor-nw-resize, .cursor-se-resize) {
         cursor: url('/cursors/rounded/nwse-resize.svg') 16 16, nwse-resize;
     }
@@ -371,6 +390,9 @@
     }
     html[data-cursor="crosshair"] .desktop-window-titlebar {
         cursor: url('/cursors/crosshair/move.svg') 16 16, move;
+    }
+    html[data-cursor="crosshair"] .desktop-window-titlebar[data-dragging] {
+        cursor: url('/cursors/crosshair/move.svg') 16 16, grabbing;
     }
     html[data-cursor="crosshair"] :is(.cursor-nw-resize, .cursor-se-resize) {
         cursor: url('/cursors/crosshair/nwse-resize.svg') 16 16, nwse-resize;

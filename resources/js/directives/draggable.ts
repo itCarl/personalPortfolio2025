@@ -59,7 +59,7 @@ const Draggable: Directive<HTMLElement, BindingValue> = {
                 if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return
                 // promote to an actual drag
                 dragging = true
-                handleEl.style.cursor = 'grabbing'
+                handleEl.dataset.dragging = ''
                 document.body.style.userSelect = 'none'
             }
 
@@ -76,7 +76,7 @@ const Draggable: Directive<HTMLElement, BindingValue> = {
             document.removeEventListener('pointercancel', endDrag)
             if (dragging) {
                 document.body.style.userSelect = ''
-                handleEl.style.cursor = 'grab'
+                delete handleEl.dataset.dragging
             }
             pointerId = null
             dragging = false
@@ -113,15 +113,19 @@ const Draggable: Directive<HTMLElement, BindingValue> = {
             // note: no preventDefault here, so click / dblclick still fire when there's no drag
         }
 
-        // initial styles
+        // initial styles. The handle is only *marked* — `cursor: grab` /
+        // `grabbing` live in app.css, because an inline cursor would outrank
+        // every layer and kill the cursor sets' title-bar rules.
         el.style.position = 'absolute'
-        handleEl.style.cursor = 'grab'
+        handleEl.dataset.draggableHandle = ''
         handleEl.style.touchAction = 'none'
         apply()
 
         handleEl.addEventListener('pointerdown', onPointerDown)
 
         cleanupMap.set(el, () => {
+            delete handleEl.dataset.draggableHandle
+            delete handleEl.dataset.dragging
             handleEl.removeEventListener('pointerdown', onPointerDown)
             document.removeEventListener('pointermove', onPointerMove)
             document.removeEventListener('pointerup', endDrag)

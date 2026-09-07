@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed, defineAsyncComponent, Suspense, type CSSProperties } from 'vue'
-import { cn } from '@/lib/utils'
 import { useIsMobile } from '@/composables/useIsMobile'
 
 const props = withDefaults(defineProps<{
@@ -150,10 +149,7 @@ function startResize(e: MouseEvent, dir: ResizeDir) {
             v-draggable="isMobile ? false : { bounce: true, mode: 'topleft', handle: 'header' }"
             @mousedown="requestFocus"
             :style="windowStyle"
-            :class="cn(
-                'bg-card border-2 border-ink dark:border-white/80 shadow-sticker rounded-md overflow-hidden select-text',
-                isMobile && 'flex flex-col',
-            )"
+            class="flex flex-col bg-card border-2 border-ink dark:border-white/80 shadow-sticker rounded-md overflow-hidden select-text"
         >
             <!-- `desktop-window-titlebar` is the hook the cursor sets in app.css use -->
             <header
@@ -173,11 +169,11 @@ function startResize(e: MouseEvent, dir: ResizeDir) {
                 </div>
             </header>
 
-            <!-- kept mounted while minimized so window content state is preserved -->
-            <main :class="cn(
-                'bg-card text-body dark:text-foreground overflow-auto relative',
-                isMobile ? 'flex-1 min-h-0' : 'h-full',
-            )">
+            <!-- kept mounted while minimized so window content state is preserved.
+                 `flex-1 min-h-0` in both modes: the content area is exactly the
+                 window minus the title bar, so bottom-anchored controls inside a
+                 window aren't clipped by `overflow-hidden` on the root. -->
+            <main class="bg-card text-body dark:text-foreground overflow-auto relative flex-1 min-h-0">
                 <Suspense>
                     <template #default>
                         <component :is="AsyncContent" v-bind="contentProps" />
