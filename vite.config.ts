@@ -7,7 +7,10 @@ import { defineConfig } from 'vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/js/app.ts'],
+            // Index.vue is listed explicitly so it gets its own manifest entry:
+            // as the only page it would otherwise be merged into a nameless chunk,
+            // and app.blade.php resolves the current page through the manifest.
+            input: ['resources/js/app.ts', 'resources/js/pages/Index.vue'],
             ssr: 'resources/js/ssr.ts',
             refresh: true,
         }),
