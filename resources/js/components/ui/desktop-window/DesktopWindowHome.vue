@@ -30,8 +30,8 @@
         </ul>
 
         <div class="rounded-md bg-pastel-green-soft px-4 py-3 text-sm text-ink">
-            ✅ Tip: open <strong>Images</strong> to see past projects, or
-            <strong>Talk to a human</strong> to get in touch.
+            ✅ Tip: open <strong>Projects</strong> for case studies, <strong>Images</strong> for a
+            visual overview, or <strong>Talk to a human</strong> to get in touch.
         </div>
     </article>
 </template>

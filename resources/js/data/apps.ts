@@ -80,7 +80,7 @@ export const appDefinitions = [
         'Projects',
         Folder,
         () => import('@/components/ui/desktop-window/DesktopWindowProjects.vue'),
-        { width: 460, height: 210 }
+        { width: 640, height: 520 }
     ),
     makeApp(
         'Display Options',
