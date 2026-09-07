@@ -21,13 +21,15 @@ import {
 import Desktop from '@/components/Desktop.vue';
 import CommandPalette from '@/components/CommandPalette.vue';
 import Toaster from '@/components/Toaster.vue';
-import { appDefinitions } from '@/data/apps';
+import Confetti from '@/components/Confetti.vue';
+import { openAppWindow } from '@/data/apps';
 import { useWindowManager } from '@/composables/useWindowManager';
 import { useWindowShortcuts } from '@/composables/useWindowShortcuts';
 import { useSessionPersistence, SESSION_STORAGE_KEY } from '@/composables/useSessionPersistence';
 import { useToast } from '@/composables/useToast';
 import { useIsMobile } from '@/composables/useIsMobile';
-import { nextTick, ref } from 'vue';
+import { KONAMI, createCheatMatcher, useSecrets } from '@/games/useCheatCodes';
+import { nextTick, onMounted, onUnmounted, ref } from 'vue';
 
 const wm = useWindowManager();
 const { toast } = useToast();
@@ -45,24 +47,47 @@ const description =
     'Portfolio of Maximilian Mewes — developer from Brandenburg an der Havel building web apps with Vue, Laravel and TypeScript, 3D-printing tools and the occasional dartboard robot.';
 
 /**
- * Opens the app with the given id from the shared registry, using the same
- * window shape the desktop icons use. `contentProps` is handed to the window
- * content on mount and, when a re-open supplies new ones, merged into the
- * already open window so the content picks them up (e.g. a different project
- * pre-filter); a call without `contentProps` leaves the existing ones in place.
+ * Opens the app or game with the given id from the shared registry, using the
+ * same window shape the desktop icons use. See `openAppWindow` for how
+ * `contentProps` behaves on a re-open (e.g. a different project pre-filter).
  */
 function openApp(id: string, contentProps?: Record<string, unknown>) {
-    const app = appDefinitions.find(a => a.id === id);
-    if (!app) return;
-    wm.openWindow({
-        id: app.id,
-        title: app.title,
-        contentLoader: app.contentLoader,
-        contentProps,
-        width: app.width,
-        height: app.height,
-    });
+    openAppWindow(wm, id, contentProps);
 }
+
+/**
+ * Desktop-level Konami code. `useCheatCodes` gates on the window context a
+ * DesktopWindow provides, and Index.vue sits outside every window — so the
+ * matcher is driven by hand here and only fed while no window is on top
+ * (`topZ === 0`) and nothing is being typed into a field.
+ */
+const { unlock } = useSecrets();
+const confettiOn = ref(false);
+const confettiKey = ref(0);
+
+const konami = createCheatMatcher({
+    [KONAMI]: () => {
+        toast('You found the secret. 🎉');
+        confettiKey.value++;
+        confettiOn.value = true;
+        unlock('konami');
+    },
+});
+
+function isTyping(target: EventTarget | null) {
+    return (
+        target instanceof HTMLElement &&
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+    );
+}
+
+function onDesktopKey(e: KeyboardEvent) {
+    if (wm.topZ.value !== 0 || isTyping(e.target)) return;
+    konami.feed(e.key);
+}
+
+onMounted(() => window.addEventListener('keydown', onDesktopKey));
+onUnmounted(() => window.removeEventListener('keydown', onDesktopKey));
 
 async function resetSession() {
     wm.windows.map(w => w.id).forEach(id => wm.closeWindow(id));
@@ -230,5 +255,6 @@ async function resetSession() {
 
         <CommandPalette :open="paletteOpen" @close="paletteOpen = false" />
         <Toaster />
+        <Confetti v-if="confettiOn" :key="confettiKey" @done="confettiOn = false" />
     </div>
 </template>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, defineAsyncComponent, Suspense, type CSSProperties } from 'vue'
+import { ref, computed, defineAsyncComponent, provide, Suspense, toRef, type CSSProperties } from 'vue'
 import { useIsMobile } from '@/composables/useIsMobile'
+import { useWindowManager } from '@/composables/useWindowManager'
+import { WINDOW_CONTEXT_KEY } from '@/games/useWindowContext'
 
 const props = withDefaults(defineProps<{
     title: string
@@ -32,6 +34,15 @@ const left = ref(Math.max(16, window.innerWidth / 2 - width.value / 2) + cascade
 const top = ref(Math.max(16, window.innerHeight / 2 - height.value / 2) + cascade)
 
 const isResizing = ref(false)
+
+// Window content (games, mostly) needs to know whether it owns the keyboard.
+// `z` is unique per window and `topZ` is the highest z of the non-minimized ones,
+// so comparing the two is the same "is this the front window" test the manager uses.
+const wm = useWindowManager()
+provide(WINDOW_CONTEXT_KEY, {
+    focused: computed(() => props.z === wm.topZ.value),
+    minimized: toRef(props, 'minimized'),
+})
 
 // Desktop: free-floating, cascaded, resizable box. Mobile: the window fills the
 // desktop area, and only the top-most non-minimized one is visible (the rest stay

@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import DesktopElement from '@/components/ui/desktop-element/DesktopElement.vue';
 import Window from '@/components/ui/desktop-window/DesktopWindow.vue';
-import { appDefinitions } from '@/data/apps';
+import { appDefinitions, openAppWindow } from '@/data/apps';
 import { useWindowManager } from '@/composables/useWindowManager';
 import { useIsMobile } from '@/composables/useIsMobile';
 
@@ -48,15 +48,7 @@ const icons = computed(() =>
 
 // handler when DesktopElement emits open (id)
 function onIconOpen(id: string) {
-    const app = icons.value.find(a => a.id === id)
-    if (!app) return
-    wm.openWindow({
-        id: app.id,
-        title: app.title,
-        contentLoader: app.contentLoader,
-        width: app.width,
-        height: app.height,
-    })
+    openAppWindow(wm, id)
 }
 </script>
 

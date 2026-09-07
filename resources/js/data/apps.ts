@@ -1,6 +1,7 @@
 import { AnyFn } from '@vueuse/core'
 import {
     FileText,
+    Gamepad2,
     MessageSquareMore,
     CalculatorIcon,
     MailOpen,
@@ -9,8 +10,10 @@ import {
     FolderOpen,
     Settings
 } from 'lucide-vue-next'
+import { gameDefinitions } from '@/games/registry'
+import type { useWindowManager } from '@/composables/useWindowManager'
 
-type AppDefinition = {
+export type AppDefinition = {
     id: string
     title: string
     icon: any
@@ -89,9 +92,57 @@ export const appDefinitions = [
         { width: 640, height: 460 }
     ),
     makeApp(
+        'Games',
+        Gamepad2,
+        () => import('@/components/ui/desktop-window/DesktopWindowGames.vue'),
+        { width: 560, height: 420 }
+    ),
+    makeApp(
         'Trash',
         Trash2,
         () => import('@/components/ui/desktop-window/DesktopWindowTrash.vue'),
         { width: 360, height: 240 }
     ),
 ]
+
+/**
+ * Apps and games share one id space; games are looked up second, so an app id
+ * always wins. This is the only place that resolves an id to a window shape —
+ * icons, the palette, the menubar and session restore all go through it.
+ */
+export function findApp(id: string): AppDefinition | undefined {
+    const app = appDefinitions.find(a => a.id === id)
+    if (app) return app
+    const game = gameDefinitions.find(g => g.id === id)
+    if (!game) return undefined
+    return {
+        id: game.id,
+        title: game.title,
+        icon: game.icon,
+        contentLoader: game.loader,
+        width: game.width,
+        height: game.height,
+    }
+}
+
+/**
+ * Opens the app or game with the given id in the window manager. `contentProps`
+ * is handed to the window content on mount and, on a re-open, merged into the
+ * already open window; a call without it leaves existing props in place.
+ */
+export function openAppWindow(
+    wm: ReturnType<typeof useWindowManager>,
+    id: string,
+    contentProps?: Record<string, unknown>,
+) {
+    const app = findApp(id)
+    if (!app) return
+    wm.openWindow({
+        id: app.id,
+        title: app.title,
+        contentLoader: app.contentLoader,
+        contentProps,
+        width: app.width,
+        height: app.height,
+    })
+}

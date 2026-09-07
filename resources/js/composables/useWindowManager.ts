@@ -1,4 +1,4 @@
-import { reactive, readonly } from 'vue'
+import { computed, reactive, readonly } from 'vue'
 
 type WindowDef = {
     id: string
@@ -98,8 +98,15 @@ export function useWindowManager() {
         focusWindow(lowest.id)
     }
 
+    // highest z among non-minimized windows; 0 when the desktop itself is on top.
+    // Window content compares its own z against this to know whether it's focused.
+    const topZ = computed(() =>
+        Math.max(0, ...state.windows.filter(w => !w.minimized).map(w => w.z)),
+    )
+
     return {
         windows: readonly(state.windows),
+        topZ,
         openWindow,
         closeWindow,
         focusWindow,

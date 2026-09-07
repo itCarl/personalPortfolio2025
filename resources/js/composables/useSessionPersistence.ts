@@ -1,5 +1,5 @@
 import { onMounted, watch } from 'vue'
-import { appDefinitions } from '@/data/apps'
+import { findApp, openAppWindow } from '@/data/apps'
 import { useWindowManager } from '@/composables/useWindowManager'
 
 type Wm = ReturnType<typeof useWindowManager>
@@ -22,16 +22,10 @@ export function useSessionPersistence(wm: Wm) {
             if (!raw) return
             const saved = JSON.parse(raw) as SavedWindow[]
             saved.forEach(({ id, minimized }) => {
-                const app = appDefinitions.find(a => a.id === id)
-                if (!app) return
-                wm.openWindow({
-                    id: app.id,
-                    title: app.title,
-                    contentLoader: app.contentLoader,
-                    width: app.width,
-                    height: app.height,
-                })
-                if (minimized) wm.toggleMinimize(app.id)
+                // an id from an older session may no longer exist in the registry
+                if (!findApp(id)) return
+                openAppWindow(wm, id)
+                if (minimized) wm.toggleMinimize(id)
             })
         } catch {
             // ignore corrupt/unavailable storage
