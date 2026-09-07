@@ -26,13 +26,15 @@ const categoryLabels: Record<Project['category'], string> = {
     games: 'Games',
 }
 
-// One pastel per category so a card is recognisable at a glance.
+// One pastel per category so a card is recognisable at a glance. The pastel-soft
+// backgrounds stay light in both themes, so they keep dark ink; bg-secondary follows
+// the theme and needs the foreground colour to follow with it.
 const categoryBadge: Record<Project['category'], string> = {
-    web: 'bg-pastel-blue-soft',
-    tools: 'bg-pastel-purple-soft',
-    '3d-printing': 'bg-pastel-green-soft',
-    electronics: 'bg-pastel-red-soft',
-    games: 'bg-secondary',
+    web: 'bg-pastel-blue-soft text-ink',
+    tools: 'bg-pastel-purple-soft text-ink',
+    '3d-printing': 'bg-pastel-green-soft text-ink',
+    electronics: 'bg-pastel-red-soft text-ink',
+    games: 'bg-secondary text-ink dark:text-foreground',
 }
 
 const activeFilter = ref<Filter>(props.initialFilter)
@@ -103,7 +105,7 @@ function toggle(slug: string) {
                             <span class="font-semibold text-ink dark:text-foreground">{{ project.title }}</span>
                             <span class="text-xs text-mute">{{ project.year }}</span>
                             <span
-                                class="rounded-full px-2 py-0.5 text-[11px] font-medium text-ink"
+                                class="rounded-full px-2 py-0.5 text-[11px] font-medium"
                                 :class="categoryBadge[project.category]"
                             >
                                 {{ categoryLabels[project.category] }}
