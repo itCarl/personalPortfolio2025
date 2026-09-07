@@ -26,10 +26,12 @@ import { useWindowManager } from '@/composables/useWindowManager';
 import { useWindowShortcuts } from '@/composables/useWindowShortcuts';
 import { useSessionPersistence, SESSION_STORAGE_KEY } from '@/composables/useSessionPersistence';
 import { useToast } from '@/composables/useToast';
+import { useIsMobile } from '@/composables/useIsMobile';
 import { nextTick, ref } from 'vue';
 
 const wm = useWindowManager();
 const { toast } = useToast();
+const isMobile = useIsMobile();
 
 const paletteOpen = ref(false);
 function togglePalette() {
@@ -89,6 +91,9 @@ async function resetSession() {
                         <LayoutDashboard class="text-primary" />
                     </button>
                 </MenubarMenu>
+                <!-- the four text menus don't fit next to the right-hand menus on phones;
+                     everything they open is still reachable from the palette and icons -->
+                <template v-if="!isMobile">
                 <MenubarMenu>
                     <MenubarTrigger>Portfolio OS</MenubarTrigger>
                     <MenubarContent>
@@ -162,6 +167,7 @@ async function resetSession() {
                         </MenubarItem>
                     </MenubarContent>
                 </MenubarMenu>
+                </template>
             </Menubar>
             <Menubar>
                 <MenubarMenu>

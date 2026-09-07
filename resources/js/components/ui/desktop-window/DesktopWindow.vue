@@ -1,19 +1,24 @@
 <script setup lang="ts">
-import { ref, defineAsyncComponent, Suspense } from 'vue'
+import { ref, computed, defineAsyncComponent, Suspense, type CSSProperties } from 'vue'
+import { cn } from '@/lib/utils'
+import { useIsMobile } from '@/composables/useIsMobile'
 
 const props = withDefaults(defineProps<{
     title: string
     contentLoader?: () => Promise<any>
     contentProps?: Record<string, unknown>
     minimized?: boolean
+    /** mobile only: whether this is the top-most non-minimized window */
+    active?: boolean
     z?: number
     width?: number
     height?: number
-}>(), { minimized: false, z: 40, width: 640, height: 440 })
+}>(), { minimized: false, active: true, z: 40, width: 640, height: 440 })
 
 const emit = defineEmits(['close', 'minimize', 'request-focus'])
 
 const fullscreen = ref(false)
+const isMobile = useIsMobile()
 
 const MIN_W = 360
 const MIN_H = 240
@@ -28,6 +33,32 @@ const left = ref(Math.max(16, window.innerWidth / 2 - width.value / 2) + cascade
 const top = ref(Math.max(16, window.innerHeight / 2 - height.value / 2) + cascade)
 
 const isResizing = ref(false)
+
+// Desktop: free-floating, cascaded, resizable box. Mobile: the window fills the
+// desktop area, and only the top-most non-minimized one is visible (the rest stay
+// mounted, so their content keeps its state — same trick as `minimized`).
+const windowStyle = computed<CSSProperties>(() => {
+    if (isMobile.value) {
+        return {
+            position: 'absolute',
+            inset: '0',
+            width: '100%',
+            height: '100%',
+            zIndex: props.z,
+            display: props.minimized || !props.active ? 'none' : undefined,
+        }
+    }
+    return {
+        position: fullscreen.value ? 'fixed' : 'absolute',
+        left: fullscreen.value ? '0' : `${left.value}px`,
+        top: fullscreen.value ? '0' : `${top.value}px`,
+        width: fullscreen.value ? '100%' : `${width.value}px`,
+        height: fullscreen.value ? '100%' : `${height.value}px`,
+        minHeight: '120px',
+        zIndex: fullscreen.value ? 9999 : props.z,
+        display: props.minimized ? 'none' : undefined,
+    }
+})
 
 const AsyncContent = props.contentLoader
     ? defineAsyncComponent(props.contentLoader)
@@ -113,21 +144,16 @@ function startResize(e: MouseEvent, dir: ResizeDir) {
 </script>
 
 <template>
-    <teleport to="body">
+    <!-- disabled on mobile: the window then renders in place, inside #desktop -->
+    <teleport to="body" :disabled="isMobile">
         <div
-            v-draggable="{ bounce: true, mode: 'topleft', handle: 'header' }"
+            v-draggable="isMobile ? false : { bounce: true, mode: 'topleft', handle: 'header' }"
             @mousedown="requestFocus"
-            :style="{
-                position: fullscreen ? 'fixed' : 'absolute',
-                left: fullscreen ? '0' : `${left}px`,
-                top: fullscreen ? '0' : `${top}px`,
-                width: fullscreen ? '100%' : `${width}px`,
-                height: fullscreen ? '100%' : `${height}px`,
-                minHeight: '120px',
-                zIndex: fullscreen ? 9999 : props.z,
-                display: minimized ? 'none' : undefined
-            }"
-            class="bg-card border-2 border-ink dark:border-white/80 shadow-sticker rounded-md overflow-hidden select-text"
+            :style="windowStyle"
+            :class="cn(
+                'bg-card border-2 border-ink dark:border-white/80 shadow-sticker rounded-md overflow-hidden select-text',
+                isMobile && 'flex flex-col',
+            )"
         >
             <header
                 class="flex items-center justify-between px-3 py-2 bg-secondary border-b border-hairline"
@@ -141,13 +167,16 @@ function startResize(e: MouseEvent, dir: ResizeDir) {
 
                 <div class="flex items-center gap-1">
                     <button @click="toggleMinimize" class="press px-2 py-1 rounded hover:bg-accent" title="Minimize">—</button>
-                    <button @click="toggleFullscreen" class="press px-2 py-1 rounded hover:bg-accent" title="Fullscreen">▢</button>
+                    <button v-if="!isMobile" @click="toggleFullscreen" class="press px-2 py-1 rounded hover:bg-accent" title="Fullscreen">▢</button>
                     <button @click="closeWindow" class="press px-2 py-1 rounded hover:bg-pastel-red hover:text-white" title="Close">✕</button>
                 </div>
             </header>
 
             <!-- kept mounted while minimized so window content state is preserved -->
-            <main class="bg-card text-body dark:text-foreground h-full overflow-auto relative">
+            <main :class="cn(
+                'bg-card text-body dark:text-foreground overflow-auto relative',
+                isMobile ? 'flex-1 min-h-0' : 'h-full',
+            )">
                 <Suspense>
                     <template #default>
                         <component :is="AsyncContent" v-bind="contentProps" />
@@ -159,7 +188,7 @@ function startResize(e: MouseEvent, dir: ResizeDir) {
             </main>
 
             <!-- Resize handles: 4 edges + 4 corners -->
-            <template v-if="!fullscreen">
+            <template v-if="!fullscreen && !isMobile">
                 <div @mousedown="startResize($event, 'n')" class="absolute top-0 inset-x-0 h-1.5 cursor-n-resize select-none z-20"></div>
                 <div @mousedown="startResize($event, 's')" class="absolute bottom-0 inset-x-0 h-1.5 cursor-s-resize select-none z-20"></div>
                 <div @mousedown="startResize($event, 'w')" class="absolute inset-y-0 left-0 w-1.5 cursor-w-resize select-none z-20"></div>
