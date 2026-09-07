@@ -230,17 +230,158 @@
     body {
         @apply bg-background text-foreground;
     }
+    /*
+      Desktop texture. Self-hosted from public/images/textures/ — it used to be
+      loaded from http://maximilian-mewes.de, which HTTPS blocks as mixed
+      content. Only the `default` wallpaper keeps the texture; every other
+      preset paints its own surface (see resources/js/data/wallpapers.ts).
+    */
     #desktop::before {
         content: "";
         position: absolute;
         top: 0;
         left: 0;
         opacity: 1;
-        background: url('http://maximilian-mewes.de/images/fleck-black.png');
-        background-repeat: repeat;         /* ✅ make it tile */
-        background-size: 250px 250px;      /* ✅ adjust to control density */
+        background: url('/images/textures/fleck-black.png');
+        background-repeat: repeat;         /* make it tile */
+        background-size: 250px 250px;      /* adjust to control density */
         z-index: 0;
         width: 100%;
         height: 100%;
+    }
+    html[data-wallpaper]:not([data-wallpaper="default"]) #desktop::before {
+        display: none;
+    }
+}
+
+@layer components {
+    /*
+      The desktop surface. `--wallpaper` and `--wallpaper-size` are written to
+      <html> by `applySettings()` (resources/js/composables/useSettings.ts) from
+      the preset picked in Settings; without JS the plain theme background shows
+      through. `background-size` has to come *after* the shorthand, which would
+      otherwise reset it.
+    */
+    .desktop {
+        background: var(--wallpaper, var(--background));
+        background-size: var(--wallpaper-size, auto);
+    }
+
+    /* Only the `aurora` preset animates, and only if motion is welcome. */
+    html[data-wallpaper="aurora"] .desktop {
+        animation: wallpaper-drift 32s ease-in-out infinite;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        html[data-wallpaper="aurora"] .desktop {
+            animation: none;
+        }
+    }
+}
+
+@keyframes wallpaper-drift {
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/*
+  Cursor sets.
+
+  `applySettings()` sets `data-cursor="<set>"` on <html>; everything below is
+  hand-written per set. The two numbers after each `url()` are the hotspot from
+  `cursorHotspots` / `cursorHotspotOverrides` in resources/js/data/cursors.ts —
+  keep the two files in sync.
+
+  These live in `@layer utilities` on purpose: the resize handles in
+  DesktopWindow.vue carry Tailwind's `cursor-*` utilities, and a rule in an
+  earlier layer would lose to them no matter how specific it is. On mobile those
+  handles don't exist (Task 4), so the resize rules simply match nothing there.
+*/
+@layer utilities {
+    /* --- Pixel: 1-bit, hard edges, Win95 feel ------------------------- */
+    html[data-cursor="pixel"],
+    html[data-cursor="pixel"] .cursor-default {
+        cursor: url('/cursors/pixel/default.svg') 2 2, auto;
+    }
+    html[data-cursor="pixel"] :is(a, button, [role="button"], .press, summary) {
+        cursor: url('/cursors/pixel/pointer.svg') 6 2, pointer;
+    }
+    html[data-cursor="pixel"] :is(input, textarea, [contenteditable]) {
+        cursor: url('/cursors/pixel/text.svg') 16 16, text;
+    }
+    html[data-cursor="pixel"] .desktop-window-titlebar {
+        cursor: url('/cursors/pixel/move.svg') 16 16, move;
+    }
+    html[data-cursor="pixel"] :is(.cursor-nw-resize, .cursor-se-resize) {
+        cursor: url('/cursors/pixel/nwse-resize.svg') 16 16, nwse-resize;
+    }
+    html[data-cursor="pixel"] :is(.cursor-ne-resize, .cursor-sw-resize) {
+        cursor: url('/cursors/pixel/nesw-resize.svg') 16 16, nesw-resize;
+    }
+    html[data-cursor="pixel"] :is(.cursor-e-resize, .cursor-w-resize) {
+        cursor: url('/cursors/pixel/ew-resize.svg') 16 16, ew-resize;
+    }
+    html[data-cursor="pixel"] :is(.cursor-n-resize, .cursor-s-resize) {
+        cursor: url('/cursors/pixel/ns-resize.svg') 16 16, ns-resize;
+    }
+
+    /* --- Rounded: soft arrow with a drop shadow ----------------------- */
+    html[data-cursor="rounded"],
+    html[data-cursor="rounded"] .cursor-default {
+        cursor: url('/cursors/rounded/default.svg') 2 2, auto;
+    }
+    html[data-cursor="rounded"]
+        :is(a, button, [role="button"], .press, summary) {
+        cursor: url('/cursors/rounded/pointer.svg') 6 2, pointer;
+    }
+    html[data-cursor="rounded"] :is(input, textarea, [contenteditable]) {
+        cursor: url('/cursors/rounded/text.svg') 16 16, text;
+    }
+    html[data-cursor="rounded"] .desktop-window-titlebar {
+        cursor: url('/cursors/rounded/move.svg') 16 16, move;
+    }
+    html[data-cursor="rounded"] :is(.cursor-nw-resize, .cursor-se-resize) {
+        cursor: url('/cursors/rounded/nwse-resize.svg') 16 16, nwse-resize;
+    }
+    html[data-cursor="rounded"] :is(.cursor-ne-resize, .cursor-sw-resize) {
+        cursor: url('/cursors/rounded/nesw-resize.svg') 16 16, nesw-resize;
+    }
+    html[data-cursor="rounded"] :is(.cursor-e-resize, .cursor-w-resize) {
+        cursor: url('/cursors/rounded/ew-resize.svg') 16 16, ew-resize;
+    }
+    html[data-cursor="rounded"] :is(.cursor-n-resize, .cursor-s-resize) {
+        cursor: url('/cursors/rounded/ns-resize.svg') 16 16, ns-resize;
+    }
+
+    /* --- Crosshair: thin cross, centre-anchored for every role -------- */
+    html[data-cursor="crosshair"],
+    html[data-cursor="crosshair"] .cursor-default {
+        cursor: url('/cursors/crosshair/default.svg') 16 16, crosshair;
+    }
+    html[data-cursor="crosshair"]
+        :is(a, button, [role="button"], .press, summary) {
+        cursor: url('/cursors/crosshair/pointer.svg') 16 16, pointer;
+    }
+    html[data-cursor="crosshair"] :is(input, textarea, [contenteditable]) {
+        cursor: url('/cursors/crosshair/text.svg') 16 16, text;
+    }
+    html[data-cursor="crosshair"] .desktop-window-titlebar {
+        cursor: url('/cursors/crosshair/move.svg') 16 16, move;
+    }
+    html[data-cursor="crosshair"] :is(.cursor-nw-resize, .cursor-se-resize) {
+        cursor: url('/cursors/crosshair/nwse-resize.svg') 16 16, nwse-resize;
+    }
+    html[data-cursor="crosshair"] :is(.cursor-ne-resize, .cursor-sw-resize) {
+        cursor: url('/cursors/crosshair/nesw-resize.svg') 16 16, nesw-resize;
+    }
+    html[data-cursor="crosshair"] :is(.cursor-e-resize, .cursor-w-resize) {
+        cursor: url('/cursors/crosshair/ew-resize.svg') 16 16, ew-resize;
+    }
+    html[data-cursor="crosshair"] :is(.cursor-n-resize, .cursor-s-resize) {
+        cursor: url('/cursors/crosshair/ns-resize.svg') 16 16, ns-resize;
     }
 }
