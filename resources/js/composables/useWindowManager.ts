@@ -28,6 +28,10 @@ export function useWindowManager() {
     function openWindow(payload: { id: string; title: string; contentLoader?: () => Promise<any>; contentProps?: Record<string, unknown>; x?: number; y?: number; width?: number; height?: number }) {
         const existing = find(payload.id)
         if (existing) {
+            // A re-open may carry new content props (e.g. a different pre-filter).
+            // Merge them in — the windows array is reactive, so the mounted content
+            // sees the change; a payload without props leaves the old ones alone.
+            if (payload.contentProps) existing.contentProps = payload.contentProps
             focusWindow(payload.id)
             existing.minimized = false
             return existing

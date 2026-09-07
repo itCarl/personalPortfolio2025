@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { ChevronRight, ExternalLink } from 'lucide-vue-next'
 import { projects, type Project } from '@/data/projects'
 
@@ -39,6 +39,17 @@ const categoryBadge: Record<Project['category'], string> = {
 
 const activeFilter = ref<Filter>(props.initialFilter)
 const expanded = ref<string | null>(null)
+
+// Re-opening this window with a different pre-filter (menubar / command palette)
+// updates the prop on the already mounted component, so adopt the new filter and
+// collapse whatever was expanded under the old one.
+watch(
+    () => props.initialFilter,
+    value => {
+        activeFilter.value = value
+        expanded.value = null
+    }
+)
 
 const visibleProjects = computed(() =>
     activeFilter.value === 'all'

@@ -47,8 +47,9 @@ const description =
 /**
  * Opens the app with the given id from the shared registry, using the same
  * window shape the desktop icons use. `contentProps` is handed to the window
- * content on first mount — an already open window is only focused, so its
- * current state is never overwritten.
+ * content on mount and, when a re-open supplies new ones, merged into the
+ * already open window so the content picks them up (e.g. a different project
+ * pre-filter); a call without `contentProps` leaves the existing ones in place.
  */
 function openApp(id: string, contentProps?: Record<string, unknown>) {
     const app = appDefinitions.find(a => a.id === id);
