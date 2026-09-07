@@ -23,7 +23,7 @@ export function useWindowManager() {
         return state.windows.find(w => w.id === id)
     }
 
-    function openWindow(payload: { id: string; title: string; contentLoader?: () => Promise<any>; x?: number; y?: number }) {
+    function openWindow(payload: { id: string; title: string; contentLoader?: () => Promise<any>; x?: number; y?: number; width?: number; height?: number }) {
         const existing = find(payload.id)
         if (existing) {
             focusWindow(payload.id)
@@ -38,6 +38,8 @@ export function useWindowManager() {
             z: ++state.zCounter,
             x: payload.x,
             y: payload.y,
+            width: payload.width,
+            height: payload.height,
             isLoaded: false,
         }
         state.windows.push(w)
@@ -74,6 +76,21 @@ export function useWindowManager() {
         Object.assign(w, partial)
     }
 
+    // the focused window = top-most (highest z) that isn't minimized
+    function activeWindow() {
+        const visible = state.windows.filter(w => !w.minimized)
+        if (!visible.length) return undefined
+        return visible.reduce((top, w) => (w.z > top.z ? w : top))
+    }
+
+    // bring the bottom-most visible window to the front (cycles through the stack)
+    function cycleWindows() {
+        const visible = state.windows.filter(w => !w.minimized)
+        if (visible.length < 2) return
+        const lowest = visible.reduce((lo, w) => (w.z < lo.z ? w : lo))
+        focusWindow(lowest.id)
+    }
+
     return {
         windows: readonly(state.windows),
         openWindow,
@@ -82,5 +99,7 @@ export function useWindowManager() {
         toggleMinimize,
         markLoaded,
         updateWindow,
+        activeWindow,
+        cycleWindows,
     }
 }

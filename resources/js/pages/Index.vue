@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { login } from '@/routes';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import {
   Menubar,
   MenubarContent,
@@ -16,14 +15,22 @@ import {
     AppWindow
 } from "lucide-vue-next"
 import Desktop from '@/components/Desktop.vue';
+import CommandPalette from '@/components/CommandPalette.vue';
+import Toaster from '@/components/Toaster.vue';
 import { useWindowManager } from '@/composables/useWindowManager';
-import AppearanceTabs from '@/components/AppearanceTabs.vue';
-
-const handleLogout = () => {
-    router.flushAll();
-};
+import { useWindowShortcuts } from '@/composables/useWindowShortcuts';
+import { useSessionPersistence } from '@/composables/useSessionPersistence';
+import { ref } from 'vue';
 
 const wm = useWindowManager();
+
+const paletteOpen = ref(false);
+function togglePalette() {
+    paletteOpen.value = !paletteOpen.value;
+}
+
+useWindowShortcuts(wm, { toggle: togglePalette, isOpen: () => paletteOpen.value });
+useSessionPersistence(wm);
 </script>
 
 <template>
@@ -31,13 +38,13 @@ const wm = useWindowManager();
         <link rel="preconnect" href="https://rsms.me/" />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
     </Head>
-    <div class="flex min-h-screen flex-col bg-[#e1d7c2]">
+    <div class="flex min-h-screen flex-col bg-background">
         <header class="flex justify-between text-xl z-50 bg-background border-b">
             <Menubar>
                 <MenubarMenu>
-                    <div class="px-2">
+                    <button class="press px-2" title="Search apps (⌘K)" @click="togglePalette">
                         <LayoutDashboard class="text-primary" />
-                    </div>
+                    </button>
                 </MenubarMenu>
                 <MenubarMenu>
                     <MenubarTrigger>Portfolio OS</MenubarTrigger>
@@ -85,22 +92,44 @@ const wm = useWindowManager();
             </Menubar>
             <Menubar>
                 <MenubarMenu>
-                    <MenubarTrigger class="px-1 flex items-center gap-2">
+                    <MenubarTrigger class="press px-1 flex items-center gap-2">
                         <AppWindow :size="20" />
                         <span
                             v-if="wm.windows.length > 0"
-                            class="inline-flex items-center justify-center min-w-[20px] h-5 px-2 text-xs font-medium text-white bg-red-600 rounded-full"
+                            class="inline-flex items-center justify-center min-w-[20px] h-5 px-2 text-xs font-semibold text-primary-foreground bg-primary rounded-full"
                             aria-live="polite"
                         >{{ wm.windows.length }}</span>
                     </MenubarTrigger>
-                    <MenubarContent>
-                        <MenubarItem>
-                            New Tab
+                    <MenubarContent class="min-w-56">
+                        <template v-if="wm.windows.length > 0">
+                            <MenubarItem
+                                v-for="w in wm.windows"
+                                :key="w.id"
+                                class="flex items-center justify-between gap-3"
+                                @select="wm.focusWindow(w.id)"
+                            >
+                                <span class="flex items-center gap-2 min-w-0">
+                                    <span
+                                        class="w-1.5 h-1.5 rounded-full shrink-0"
+                                        :class="w.minimized ? 'bg-ash' : 'bg-pastel-green'"
+                                    ></span>
+                                    <span class="truncate">{{ w.title }}</span>
+                                    <span v-if="w.minimized" class="text-xs text-mute shrink-0">(minimized)</span>
+                                </span>
+                                <button
+                                    class="press shrink-0 text-mute hover:text-pastel-red"
+                                    title="Close window"
+                                    @click.stop.prevent="wm.closeWindow(w.id)"
+                                >✕</button>
+                            </MenubarItem>
+                        </template>
+                        <MenubarItem v-else disabled class="text-mute">
+                            No open windows
                         </MenubarItem>
                     </MenubarContent>
                 </MenubarMenu>
                 <MenubarMenu>
-                    <MenubarTrigger class="px-1">
+                    <MenubarTrigger class="press px-1">
                         <CircleUserRound :size="20" />
                     </MenubarTrigger>
                     <MenubarContent>
@@ -112,8 +141,11 @@ const wm = useWindowManager();
             </Menubar>
         </header>
 
-        <main id="desktop" class="relative flex-grow w-full bg-[#e1d7c2]">
+        <main id="desktop" class="relative flex-grow w-full bg-background">
             <Desktop />
         </main>
+
+        <CommandPalette :open="paletteOpen" @close="paletteOpen = false" />
+        <Toaster />
     </div>
 </template>
