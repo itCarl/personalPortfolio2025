@@ -15,16 +15,17 @@ const emit = defineEmits(['close', 'minimize', 'request-focus'])
 
 const fullscreen = ref(false)
 
-const MIN_W = 280
-const MIN_H = 160
+const MIN_W = 360
+const MIN_H = 240
 
-// Size starts from the per-widget default; position centers with a small cascade
-// so stacked windows don't perfectly overlap.
-const width = ref(props.width)
-const height = ref(props.height)
+// Size starts from the per-widget default, clamped to the minimums so a too-small
+// default can never bypass them; position centers with a small cascade so stacked
+// windows don't perfectly overlap.
+const width = ref(Math.max(MIN_W, props.width))
+const height = ref(Math.max(MIN_H, props.height))
 const cascade = (props.z % 6) * 28
-const left = ref(Math.max(16, window.innerWidth / 2 - props.width / 2) + cascade)
-const top = ref(Math.max(16, window.innerHeight / 2 - props.height / 2) + cascade)
+const left = ref(Math.max(16, window.innerWidth / 2 - width.value / 2) + cascade)
+const top = ref(Math.max(16, window.innerHeight / 2 - height.value / 2) + cascade)
 
 const isResizing = ref(false)
 

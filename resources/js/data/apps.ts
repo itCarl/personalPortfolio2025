@@ -56,7 +56,7 @@ export const appDefinitions = [
         'Calculator',
         CalculatorIcon,
         () => import('@/components/ui/desktop-window/DesktopWindowCalculator.vue'),
-        { width: 320, height: 480 }
+        { width: 360, height: 480 }
     ),
     makeApp(
         'Ask a question',
@@ -92,6 +92,6 @@ export const appDefinitions = [
         'Trash',
         Trash2,
         () => import('@/components/ui/desktop-window/DesktopWindowTrash.vue'),
-        { width: 340, height: 240 }
+        { width: 360, height: 240 }
     ),
 ]
