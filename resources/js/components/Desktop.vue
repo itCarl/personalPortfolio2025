@@ -72,6 +72,7 @@ function onIconOpen(id: string) {
             :key="w.id"
             :title="w.title"
             :content-loader="w.contentLoader"
+            :content-props="w.contentProps"
             :minimized="w.minimized"
             :z="w.z"
             :width="w.width"

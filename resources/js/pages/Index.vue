@@ -12,17 +12,24 @@ import {
 import {
     LayoutDashboard,
     CircleUserRound,
-    AppWindow
+    AppWindow,
+    Github,
+    Codepen,
+    FileUser,
+    Box
 } from "lucide-vue-next"
 import Desktop from '@/components/Desktop.vue';
 import CommandPalette from '@/components/CommandPalette.vue';
 import Toaster from '@/components/Toaster.vue';
+import { appDefinitions } from '@/data/apps';
 import { useWindowManager } from '@/composables/useWindowManager';
 import { useWindowShortcuts } from '@/composables/useWindowShortcuts';
-import { useSessionPersistence } from '@/composables/useSessionPersistence';
-import { ref } from 'vue';
+import { useSessionPersistence, SESSION_STORAGE_KEY } from '@/composables/useSessionPersistence';
+import { useToast } from '@/composables/useToast';
+import { nextTick, ref } from 'vue';
 
 const wm = useWindowManager();
+const { toast } = useToast();
 
 const paletteOpen = ref(false);
 function togglePalette() {
@@ -31,12 +38,48 @@ function togglePalette() {
 
 useWindowShortcuts(wm, { toggle: togglePalette, isOpen: () => paletteOpen.value });
 useSessionPersistence(wm);
+
+const description =
+    'Portfolio of Maximilian Mewes — developer from Brandenburg an der Havel building web apps with Vue, Laravel and TypeScript, 3D-printing tools and the occasional dartboard robot.';
+
+/**
+ * Opens the app with the given id from the shared registry, using the same
+ * window shape the desktop icons use. `contentProps` is handed to the window
+ * content on first mount — an already open window is only focused, so its
+ * current state is never overwritten.
+ */
+function openApp(id: string, contentProps?: Record<string, unknown>) {
+    const app = appDefinitions.find(a => a.id === id);
+    if (!app) return;
+    wm.openWindow({
+        id: app.id,
+        title: app.title,
+        contentLoader: app.contentLoader,
+        contentProps,
+        width: app.width,
+        height: app.height,
+    });
+}
+
+async function resetSession() {
+    wm.windows.map(w => w.id).forEach(id => wm.closeWindow(id));
+    // the persistence watcher re-saves on the next tick, so drop the key after it ran
+    await nextTick();
+    try {
+        localStorage.removeItem(SESSION_STORAGE_KEY);
+    } catch {
+        // ignore unavailable storage (private mode, blocked cookies, …)
+    }
+    toast('Session reset');
+}
 </script>
 
 <template>
-    <Head title="Welcome">
-        <link rel="preconnect" href="https://rsms.me/" />
-        <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <Head title="Portfolio OS">
+        <meta name="description" :content="description" />
+        <meta property="og:title" content="Portfolio OS - Maximilian Mewes" />
+        <meta property="og:description" :content="description" />
+        <meta property="og:type" content="website" />
     </Head>
     <div class="flex min-h-screen flex-col bg-background">
         <header class="flex justify-between text-xl z-50 bg-background border-b">
@@ -49,43 +92,73 @@ useSessionPersistence(wm);
                 <MenubarMenu>
                     <MenubarTrigger>Portfolio OS</MenubarTrigger>
                     <MenubarContent>
-                        <MenubarItem>
-                            New Tab <MenubarShortcut>⌘T</MenubarShortcut>
+                        <MenubarItem @select="openApp('portfolioOS')">
+                            About Portfolio OS
                         </MenubarItem>
-                        <MenubarItem>
-                            New Window
-                        </MenubarItem>
-                        <MenubarSeparator />
-                        <MenubarItem>
-                            Share
+                        <MenubarItem @select="openApp('displayOptions')">
+                            Display Options…
                         </MenubarItem>
                         <MenubarSeparator />
-                        <MenubarItem>
-                            Print
+                        <MenubarItem @select="resetSession">
+                            Reset session
                         </MenubarItem>
                     </MenubarContent>
                 </MenubarMenu>
                 <MenubarMenu>
                     <MenubarTrigger>3D Printing</MenubarTrigger>
                     <MenubarContent>
-                        <MenubarItem>
-                            New Tab
+                        <MenubarItem @select="openApp('projects', { initialFilter: '3d-printing' })">
+                            3D-print projects
+                        </MenubarItem>
+                        <MenubarItem as-child class="flex items-center gap-2">
+                            <a href="https://thangs.com/it.Carl" target="_blank" rel="noopener noreferrer">
+                                <Box :size="16" />
+                                Models on Thangs
+                            </a>
                         </MenubarItem>
                     </MenubarContent>
                 </MenubarMenu>
                 <MenubarMenu>
                     <MenubarTrigger>Socials</MenubarTrigger>
                     <MenubarContent>
-                        <MenubarItem>
-                            New Tab
+                        <MenubarItem as-child class="flex items-center gap-2">
+                            <a href="https://github.com/itCarl" target="_blank" rel="noopener noreferrer">
+                                <Github :size="16" />
+                                GitHub
+                            </a>
+                        </MenubarItem>
+                        <MenubarItem as-child class="flex items-center gap-2">
+                            <a href="https://codepen.io/itcarl" target="_blank" rel="noopener noreferrer">
+                                <Codepen :size="16" />
+                                CodePen
+                            </a>
+                        </MenubarItem>
+                        <MenubarItem as-child class="flex items-center gap-2">
+                            <a href="https://www.xing.com/profile/Maximilian_Mewes2/cv" target="_blank" rel="noopener noreferrer">
+                                <FileUser :size="16" />
+                                Xing
+                            </a>
+                        </MenubarItem>
+                        <MenubarItem as-child class="flex items-center gap-2">
+                            <a href="https://thangs.com/it.Carl" target="_blank" rel="noopener noreferrer">
+                                <Box :size="16" />
+                                Thangs
+                            </a>
                         </MenubarItem>
                     </MenubarContent>
                 </MenubarMenu>
                 <MenubarMenu>
                     <MenubarTrigger>More</MenubarTrigger>
                     <MenubarContent>
-                        <MenubarItem>
-                            New Tab
+                        <MenubarItem @select="openApp('askAQuestion')">
+                            Ask a question
+                        </MenubarItem>
+                        <MenubarItem @select="openApp('talkToAHuman')">
+                            Talk to a human
+                        </MenubarItem>
+                        <MenubarSeparator />
+                        <MenubarItem @select="togglePalette">
+                            Search apps <MenubarShortcut>⌘K</MenubarShortcut>
                         </MenubarItem>
                     </MenubarContent>
                 </MenubarMenu>
@@ -133,8 +206,11 @@ useSessionPersistence(wm);
                         <CircleUserRound :size="20" />
                     </MenubarTrigger>
                     <MenubarContent>
-                        <MenubarItem>
-                            New Tab
+                        <MenubarItem @select="openApp('home.md')">
+                            home.md
+                        </MenubarItem>
+                        <MenubarItem @select="openApp('talkToAHuman')">
+                            Talk to a human
                         </MenubarItem>
                     </MenubarContent>
                 </MenubarMenu>

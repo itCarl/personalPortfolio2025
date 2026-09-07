@@ -4,6 +4,7 @@ import { ref, defineAsyncComponent, Suspense } from 'vue'
 const props = withDefaults(defineProps<{
     title: string
     contentLoader?: () => Promise<any>
+    contentProps?: Record<string, unknown>
     minimized?: boolean
     z?: number
     width?: number
@@ -148,7 +149,7 @@ function startResize(e: MouseEvent, dir: ResizeDir) {
             <main class="bg-card text-body dark:text-foreground h-full overflow-auto relative">
                 <Suspense>
                     <template #default>
-                        <component :is="AsyncContent" />
+                        <component :is="AsyncContent" v-bind="contentProps" />
                     </template>
                     <template #fallback>
                         <div class="p-6 text-center text-sm text-gray-500 dark:text-gray-400">Loading…</div>

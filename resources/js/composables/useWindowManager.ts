@@ -4,6 +4,8 @@ type WindowDef = {
     id: string
     title: string
     contentLoader?: () => Promise<any>
+    // props handed to the lazily loaded content component (e.g. a pre-filter)
+    contentProps?: Record<string, unknown>
     minimized: boolean
     z: number
     x?: number
@@ -23,7 +25,7 @@ export function useWindowManager() {
         return state.windows.find(w => w.id === id)
     }
 
-    function openWindow(payload: { id: string; title: string; contentLoader?: () => Promise<any>; x?: number; y?: number; width?: number; height?: number }) {
+    function openWindow(payload: { id: string; title: string; contentLoader?: () => Promise<any>; contentProps?: Record<string, unknown>; x?: number; y?: number; width?: number; height?: number }) {
         const existing = find(payload.id)
         if (existing) {
             focusWindow(payload.id)
@@ -34,6 +36,7 @@ export function useWindowManager() {
             id: payload.id,
             title: payload.title,
             contentLoader: payload.contentLoader,
+            contentProps: payload.contentProps,
             minimized: false,
             z: ++state.zCounter,
             x: payload.x,

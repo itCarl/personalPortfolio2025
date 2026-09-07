@@ -4,7 +4,7 @@ import { useWindowManager } from '@/composables/useWindowManager'
 
 type Wm = ReturnType<typeof useWindowManager>
 
-const KEY = 'portfolio-os:session'
+export const SESSION_STORAGE_KEY = 'portfolio-os:session'
 
 type SavedWindow = { id: string; minimized: boolean }
 
@@ -18,7 +18,7 @@ type SavedWindow = { id: string; minimized: boolean }
 export function useSessionPersistence(wm: Wm) {
     function restore() {
         try {
-            const raw = localStorage.getItem(KEY)
+            const raw = localStorage.getItem(SESSION_STORAGE_KEY)
             if (!raw) return
             const saved = JSON.parse(raw) as SavedWindow[]
             saved.forEach(({ id, minimized }) => {
@@ -41,7 +41,7 @@ export function useSessionPersistence(wm: Wm) {
     function save() {
         try {
             const data: SavedWindow[] = wm.windows.map(w => ({ id: w.id, minimized: w.minimized }))
-            localStorage.setItem(KEY, JSON.stringify(data))
+            localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data))
         } catch {
             // ignore storage failures (private mode, quota, …)
         }
